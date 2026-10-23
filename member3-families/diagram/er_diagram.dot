@@ -1,0 +1,102 @@
+// CBCS E/R diagram (Member 3). Render: dot -Tpng -Gdpi=200 er_diagram.dot -o er_diagram.png
+// Notation (Ullman & Widom): rectangle = entity set, diamond = relationship set,
+// double rectangle = weak entity set, double diamond = its supporting relationship,
+// underlined = key (dashed underline = discriminator of a weak entity set),
+// plain arrow into an entity set = "at most one", round-headed arrow = "exactly one",
+// line with no arrow = "many".
+graph CBCS {
+  graph [rankdir=LR, splines=true, nodesep=0.35, ranksep=0.55, fontname="Helvetica",
+         pad=0.3, label=<<B>Country Basketball Club System (CBCS) — E/R diagram</B>>,
+         labelloc=t, fontsize=20];
+  node  [fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=10, penwidth=1.1];
+
+  // ---------------- entity sets ----------------
+  node [shape=box, style="rounded,filled", fillcolor="#EAF2FB", color="#2B5D8C", margin="0.12,0.06"];
+
+  Locations [label=<<B>Locations</B><BR ALIGN="LEFT"/><U>LocationID</U><BR ALIGN="LEFT"/>Type {Head, Branch}<BR ALIGN="LEFT"/>Name<BR ALIGN="LEFT"/>Address, City, Province, PostalCode<BR ALIGN="LEFT"/>WebAddress<BR ALIGN="LEFT"/>MaxCapacity<BR ALIGN="LEFT"/>>];
+
+  Personnel [label=<<B>Personnel</B><BR ALIGN="LEFT"/><U>PersonnelID</U><BR ALIGN="LEFT"/>FirstName, LastName, DOB<BR ALIGN="LEFT"/>SSN (unique, not null)<BR ALIGN="LEFT"/>MedicareNo (unique)<BR ALIGN="LEFT"/>Phone, Email<BR ALIGN="LEFT"/>Address, City, Province, PostalCode<BR ALIGN="LEFT"/>>];
+
+  ClubMembers [label=<<B>ClubMembers</B><BR ALIGN="LEFT"/><U>MemberID</U> (auto increment)<BR ALIGN="LEFT"/>FirstName, LastName, DOB<BR ALIGN="LEFT"/>JoinDate<BR ALIGN="LEFT"/>SSN (unique), MedicareNo (unique)<BR ALIGN="LEFT"/>Phone<BR ALIGN="LEFT"/>Address, City, Province, PostalCode<BR ALIGN="LEFT"/>>, fillcolor="#FCEFE3", color="#A35A1F"];
+
+  FamilyMembers [label=<<B>FamilyMembers</B><BR ALIGN="LEFT"/><U>FamilyMemberID</U><BR ALIGN="LEFT"/>FirstName, LastName, DOB<BR ALIGN="LEFT"/>SSN (unique, not null)<BR ALIGN="LEFT"/>MedicareNo (unique)<BR ALIGN="LEFT"/>Phone, Email<BR ALIGN="LEFT"/>Address, City, Province, PostalCode<BR ALIGN="LEFT"/>>];
+
+  Hobbies [label=<<B>Hobbies</B><BR ALIGN="LEFT"/><U>HobbyID</U><BR ALIGN="LEFT"/>Name (unique)<BR ALIGN="LEFT"/>>];
+
+  Payments [label=<<B>Payments</B><BR ALIGN="LEFT"/><U>PaymentID</U><BR ALIGN="LEFT"/>PaymentDate<BR ALIGN="LEFT"/>Amount<BR ALIGN="LEFT"/>Method {Cash, Debit, Credit}<BR ALIGN="LEFT"/>MembershipYear<BR ALIGN="LEFT"/>InstallmentNo (1–4)<BR ALIGN="LEFT"/>>];
+
+  NBA_Games [label=<<B>NBA_Games</B><BR ALIGN="LEFT"/><U>GameID</U><BR ALIGN="LEFT"/>GameDate, GameLocation<BR ALIGN="LEFT"/>HomeTeam, AwayTeam<BR ALIGN="LEFT"/>HomeScore, AwayScore<BR ALIGN="LEFT"/>>];
+
+  // ---------------- weak entity sets ----------------
+  node [peripheries=2, style="filled", fillcolor="#F3F3F3", color="#555555"];
+  LocationPhones [label=<<B>LocationPhones</B><BR ALIGN="LEFT"/><U>Phone</U> (discriminator)<BR ALIGN="LEFT"/>>];
+  Assignments [label=<<B>PersonnelAssignments</B><BR ALIGN="LEFT"/><U>StartDate</U> (discriminator)<BR ALIGN="LEFT"/>EndDate (null = still active)<BR ALIGN="LEFT"/>Role {Administrator, Captain, Coach,<BR ALIGN="LEFT"/>      Assistant Coach, Other}<BR ALIGN="LEFT"/>Title (General Manager, ...)<BR ALIGN="LEFT"/>Mandate {Volunteer, Salaried}<BR ALIGN="LEFT"/>>];
+  Measurements [label=<<B>MemberMeasurements</B><BR ALIGN="LEFT"/><U>MeasureDate</U> (discriminator)<BR ALIGN="LEFT"/>HeightCm, WeightKg<BR ALIGN="LEFT"/>>];
+
+  // ---------------- relationship sets ----------------
+  node [shape=diamond, peripheries=1, style="filled", fillcolor="#FFF7D6", color="#8A6D00", margin="0.02"];
+  MemberAt [label=<<B>MemberAt</B><BR/><FONT POINT-SIZE="9"><U>MemberID</U></FONT>>];
+  FamilyAt [label=<<B>FamilyAt</B><BR/><FONT POINT-SIZE="9"><U>FamilyMemberID</U></FONT>>];
+  AssignedTo [label=<<B>AssignedTo</B><BR/><FONT POINT-SIZE="9"><U>PersonnelID, StartDate</U></FONT>>];
+  GuardianOf [label=<<B>GuardianOf</B><BR/><FONT POINT-SIZE="9"><U>MemberID</U></FONT>>];
+  Enjoys [label=<<B>Enjoys</B><BR/><FONT POINT-SIZE="9"><U>MemberID, HobbyID</U></FONT>>];
+  PlaysIn [label=<<B>PlaysIn</B><BR/><FONT POINT-SIZE="9"><U>MemberID, GameID</U></FONT>>];
+  Makes [label=<<B>Makes</B><BR/><FONT POINT-SIZE="9"><U>PaymentID</U></FONT>>];
+  node [peripheries=2];
+  HasPhone [label=<<B>HasPhone</B><BR/><FONT POINT-SIZE="9"><U>LocationID, Phone</U></FONT>>];
+  Worked [label=<<B>Worked</B><BR/><FONT POINT-SIZE="9"><U>PersonnelID, StartDate</U></FONT>>];
+  Measured [label=<<B>Measured</B><BR/><FONT POINT-SIZE="9"><U>MemberID, MeasureDate</U></FONT>>];
+
+  // relationship attributes
+  node [shape=ellipse, peripheries=1, style="filled", fillcolor="#FFFFFF", color="#8A6D00", fontsize=10, margin="0.04"];
+  relAttr     [label="Relationship\n{Father, Mother, Grandfather,\nGrandmother, Tutor, Partner,\nFriend, Other}"];
+  playAttr    [label="TeamPlayedFor\nPoints\nDetails"];
+
+  // ---------------- edges ----------------
+  // many-one, exactly one: plain line on the many side, round arrow into the one side
+  ClubMembers   -- MemberAt   [dir=none];
+  MemberAt      -- Locations  [dir=forward, arrowhead=dot];
+  FamilyMembers -- FamilyAt   [dir=none];
+  FamilyAt      -- Locations  [dir=forward, arrowhead=dot];
+
+  // weak entity sets and their owners
+  LocationPhones -- HasPhone  [dir=none, penwidth=2.2];
+  HasPhone       -- Locations [dir=forward, arrowhead=dot];
+  Assignments    -- Worked    [dir=none, penwidth=2.2];
+  Worked         -- Personnel [dir=forward, arrowhead=dot];
+  Assignments    -- AssignedTo [dir=none];
+  AssignedTo     -- Locations [dir=forward, arrowhead=dot];
+  Measurements   -- Measured  [dir=none, penwidth=2.2];
+  Measured       -- ClubMembers [dir=forward, arrowhead=dot];
+
+  // a minor has at most one guardian at a time; a family member guards many minors
+  ClubMembers   -- GuardianOf [dir=none, label="minor"];
+  GuardianOf    -- FamilyMembers [dir=forward, arrowhead=normal];
+  GuardianOf    -- relAttr [dir=none, style=dashed];
+
+  // every payment is made by exactly one member
+  Payments -- Makes [dir=none];
+  Makes    -- ClubMembers [dir=forward, arrowhead=dot];
+
+  // many-many
+  ClubMembers -- Enjoys [dir=none];
+  Enjoys      -- Hobbies [dir=none];
+  ClubMembers -- PlaysIn [dir=none];
+  PlaysIn     -- NBA_Games [dir=none];
+  PlaysIn     -- playAttr [dir=none, style=dashed];
+
+  // ---------------- legend ----------------
+  subgraph cluster_legend {
+    label=<<B>Legend</B>>; fontsize=12; style="rounded"; color="#999999";
+    node [shape=plaintext, style="", fillcolor="", color="", fontsize=10, peripheries=1];
+    leg [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="2">
+      <TR><TD ALIGN="LEFT">Rectangle = entity set; <U>underlined</U> attribute = key</TD></TR>
+      <TR><TD ALIGN="LEFT">Double rectangle = weak entity set; key = owner key + <U>discriminator</U></TD></TR>
+      <TR><TD ALIGN="LEFT">Diamond = relationship set, with its <U>key</U>; double diamond = supporting relationship</TD></TR>
+      <TR><TD ALIGN="LEFT">Arrow into an entity set = "at most one" of that entity per relationship</TD></TR>
+      <TR><TD ALIGN="LEFT">Round-headed arrow = "exactly one" (referential integrity)</TD></TR>
+      <TR><TD ALIGN="LEFT">No arrowhead = "many"; thick line = weak entity's total participation</TD></TR>
+    </TABLE>>];
+  }
+}
