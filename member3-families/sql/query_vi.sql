@@ -17,32 +17,32 @@
 -- joins cannot multiply each other (2 children x 3 games != 6).
 -- =====================================================================
 SELECT
-    l.Name                                   AS LocationName,
-    cm.MemberID                              AS MembershipNo,
-    cm.FirstName,
-    cm.LastName,
-    TIMESTAMPDIFF(YEAR, cm.DOB, CURDATE())   AS Age,
-    cm.City,
-    cm.Province,
-    COALESCE(s.Status, 'Inactive')           AS Status,
-    lm.HeightCm,
-    lm.WeightKg,
-    kids.NumChildren,
-    games.NumGames
+    l.name                                   AS locationName,
+    cm.memberID                              AS membershipNum,
+    cm.firstName,
+    cm.lastName,
+    TIMESTAMPDIFF(YEAR, cm.DOB, CURDATE())   AS age,
+    cm.city,
+    cm.province,
+    COALESCE(s.status, 'Inactive')           AS status,
+    lm.heightCm,
+    lm.weightKg,
+    kids.numChildren,
+    games.numGames
 FROM ClubMembers AS cm
-JOIN Locations   AS l  ON l.LocationID = cm.LocationID
+JOIN Locations   AS l  ON l.locationID = cm.locationID
 JOIN (
-        SELECT fm.SSN, COUNT(*) AS NumChildren
+        SELECT fm.SSN, COUNT(*) AS numChildren
         FROM FamilyMembers  AS fm
-        JOIN MinorGuardians AS mg ON mg.FamilyMemberID = fm.FamilyMemberID
+        JOIN MinorGuardians AS mg ON mg.familyMemberID = fm.familyMemberID
         GROUP BY fm.SSN
      ) AS kids  ON kids.SSN = cm.SSN
 JOIN (
-        SELECT gp.MemberID, COUNT(*) AS NumGames
+        SELECT gp.memberID, COUNT(*) AS numGames
         FROM GameParticipations AS gp
-        GROUP BY gp.MemberID
-     ) AS games ON games.MemberID = cm.MemberID
-LEFT JOIN v_MemberStatus      AS s  ON s.MemberID  = cm.MemberID
-LEFT JOIN v_LatestMeasurement AS lm ON lm.MemberID = cm.MemberID
+        GROUP BY gp.memberID
+     ) AS games ON games.memberID = cm.memberID
+LEFT JOIN v_MemberStatus      AS s  ON s.memberID  = cm.memberID
+LEFT JOIN v_LatestMeasurement AS lm ON lm.memberID = cm.memberID
 WHERE TIMESTAMPDIFF(YEAR, cm.DOB, CURDATE()) >= 17
-ORDER BY LocationName ASC, Age ASC;
+ORDER BY locationName ASC, age ASC;

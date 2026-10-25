@@ -2,7 +2,7 @@
 -- CBCS  |  03_families.sql  |  Owner: Member 3 (Families)
 -- Tables: FamilyMembers, MinorGuardians
 -- Runs after 01_locations_personnel.sql and 02_club_members.sql,
--- because it references Locations(LocationID) and ClubMembers(MemberID).
+-- because it references Locations(locationID) and ClubMembers(memberID).
 -- Target: MySQL 8.0.16+ (CHECK constraints are enforced from 8.0.16;
 -- older servers parse and ignore them, so the script still runs).
 -- =====================================================================
@@ -10,57 +10,57 @@
 -- ---------------------------------------------------------------------
 -- FamilyMembers
 -- A registered family member who signs up one or more minor club
--- members. LocationID is the location they are associated with now;
+-- members. locationID is the location they are associated with now;
 -- a move updates the row (schema contract, decision 6).
 -- SSN is NOT NULL and UNIQUE: it is also how query vi recognises a
 -- family member who is the same person as a major club member
 -- (schema contract, decision 2, option A).
 -- ---------------------------------------------------------------------
 CREATE TABLE FamilyMembers (
-    FamilyMemberID  INT           NOT NULL AUTO_INCREMENT,
-    FirstName       VARCHAR(50)   NOT NULL,
-    LastName        VARCHAR(50)   NOT NULL,
+    familyMemberID  INT           NOT NULL AUTO_INCREMENT,
+    firstName       VARCHAR(50)   NOT NULL,
+    lastName        VARCHAR(50)   NOT NULL,
     DOB             DATE          NOT NULL,
     SSN             CHAR(9)       NOT NULL,
-    MedicareNo      CHAR(12)      NOT NULL,
-    Phone           VARCHAR(15)   NOT NULL,
-    Address         VARCHAR(100)  NOT NULL,
-    City            VARCHAR(50)   NOT NULL,
-    Province        CHAR(2)       NOT NULL,
-    PostalCode      CHAR(6)       NOT NULL,
-    Email           VARCHAR(100),
-    LocationID      INT           NOT NULL,
-    CONSTRAINT pk_familymembers   PRIMARY KEY (FamilyMemberID),
+    medicareNum     CHAR(12)      NOT NULL,
+    phone           VARCHAR(15)   NOT NULL,
+    address         VARCHAR(100)  NOT NULL,
+    city            VARCHAR(50)   NOT NULL,
+    province        CHAR(2)       NOT NULL,
+    postalCode      CHAR(6)       NOT NULL,
+    email           VARCHAR(100),
+    locationID      INT           NOT NULL,
+    CONSTRAINT pk_familymembers   PRIMARY KEY (familyMemberID),
     CONSTRAINT uq_family_ssn      UNIQUE (SSN),
-    CONSTRAINT uq_family_medicare UNIQUE (MedicareNo),
-    CONSTRAINT fk_family_location FOREIGN KEY (LocationID)
-        REFERENCES Locations (LocationID)
+    CONSTRAINT uq_family_medicare UNIQUE (medicareNum),
+    CONSTRAINT fk_family_location FOREIGN KEY (locationID)
+        REFERENCES Locations (locationID)
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT ck_family_ssn      CHECK (SSN REGEXP '^[0-9]{9}$'),
-    CONSTRAINT ck_family_postal   CHECK (PostalCode REGEXP '^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$')
+    CONSTRAINT ck_family_postal   CHECK (postalCode REGEXP '^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$')
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
 -- ---------------------------------------------------------------------
 -- MinorGuardians
 -- Links each minor club member to the one family member they are
 -- associated with now, and records the relationship.
--- PK = MemberID, so a minor has exactly one guardian at a time;
+-- PK = memberID, so a minor has exactly one guardian at a time;
 -- switching guardians updates the row (schema contract).
 -- ON DELETE RESTRICT on the family member: a family member cannot be
 -- removed while a minor still depends on them, which protects the rule
 -- that every minor needs a registered family member.
 -- ---------------------------------------------------------------------
 CREATE TABLE MinorGuardians (
-    MemberID        INT  NOT NULL,
-    FamilyMemberID  INT  NOT NULL,
-    Relationship    ENUM('Father','Mother','Grandfather','Grandmother',
+    memberID        INT  NOT NULL,
+    familyMemberID  INT  NOT NULL,
+    relationship    ENUM('Father','Mother','Grandfather','Grandmother',
                          'Tutor','Partner','Friend','Other') NOT NULL,
-    CONSTRAINT pk_minorguardians  PRIMARY KEY (MemberID),
-    CONSTRAINT fk_guardian_member FOREIGN KEY (MemberID)
-        REFERENCES ClubMembers (MemberID)
+    CONSTRAINT pk_minorguardians  PRIMARY KEY (memberID),
+    CONSTRAINT fk_guardian_member FOREIGN KEY (memberID)
+        REFERENCES ClubMembers (memberID)
         ON UPDATE CASCADE ON DELETE CASCADE,
-    CONSTRAINT fk_guardian_family FOREIGN KEY (FamilyMemberID)
-        REFERENCES FamilyMembers (FamilyMemberID)
+    CONSTRAINT fk_guardian_family FOREIGN KEY (familyMemberID)
+        REFERENCES FamilyMembers (familyMemberID)
         ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
@@ -70,7 +70,7 @@ CREATE TABLE MinorGuardians (
 -- Rows marked [CAST] must match Member 1's cast list / Member 2's rows:
 --   * FamilyMembers 1-4 are also major club members. Their SSN must be
 --     IDENTICAL to their ClubMembers.SSN, or query vi returns nothing.
---   * MinorGuardians.MemberID values must be the MemberIDs of MINOR
+--   * MinorGuardians.memberID values must be the MemberIDs of MINOR
 --     club members (age 6-16) in 02_club_members.sql.
 -- Placeholder mapping used here (replace with the real cast IDs):
 --   ClubMembers 1 Marc Tremblay    (major, NBA games, Montreal)
@@ -83,8 +83,8 @@ CREATE TABLE MinorGuardians (
 -- =====================================================================
 
 INSERT INTO FamilyMembers
-  (FamilyMemberID, FirstName, LastName, DOB, SSN, MedicareNo, Phone,
-   Address, City, Province, PostalCode, Email, LocationID) VALUES
+  (familyMemberID, firstName, lastName, DOB, SSN, medicareNum, phone,
+   address, city, province, postalCode, email, locationID) VALUES
   -- [CAST] parents who are also major club members (same SSN)
   (1,  'Marc',     'Tremblay', '1985-03-14', '100000001', 'TREM85031411', '514-555-0101',
        '1200 Rue Sainte-Catherine O', 'Montréal',  'QC', 'H3G1P1', 'marc.tremblay@mail.ca',    1),
@@ -112,7 +112,7 @@ INSERT INTO FamilyMembers
   (12, 'Chantal',  'Morin',    '1981-10-21', '200000012', 'MORC81602111', '450-555-0112',
        '410 Boulevard Curé-Labelle',  'Laval',     'QC', 'H7V2S4', 'chantal.morin@mail.ca',    2);
 
-INSERT INTO MinorGuardians (MemberID, FamilyMemberID, Relationship) VALUES
+INSERT INTO MinorGuardians (memberID, familyMemberID, relationship) VALUES
   -- [CAST] MemberIDs 11-22 must be minors in 02_club_members.sql
   (11, 1,  'Father'),       -- Léa Tremblay      <- Marc Tremblay
   (12, 1,  'Father'),       -- Noah Tremblay     <- Marc Tremblay (2 children)

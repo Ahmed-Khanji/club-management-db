@@ -46,7 +46,7 @@ member3-families/
 
 **Member 2**
 - [ ] Confirm there are **at least 10 minors** in `ClubMembers`.
-- FYI: your query iii reads my `MinorGuardians` table (`MemberID`, `FamilyMemberID`, `Relationship`). One row per minor.
+- FYI: your query iii reads my `MinorGuardians` table (`memberID`, `familyMemberID`, `relationship`). One row per minor.
 
 **Member 5**
 - [ ] Give each parent from Member 1's list **at least 1 NBA game**, or query vi returns nothing.
@@ -106,3 +106,4 @@ Format: SSN = 9 digits · Medicare = 12 characters · postal code = 6 characters
 - A family member and a club member are the **same person when their SSN matches**.
 - Each minor has **one family member at a time**; a change updates the row.
 - A family member **can't be deleted** while a minor depends on them.
+- **Naming:** tables in PascalCase (`FamilyMembers`), columns in camelCase (`familyMemberID`, `postalCode`). Acronyms stay uppercase (`SSN`, `DOB`, `ID`), and number columns end in `Num` (`medicareNum`).
